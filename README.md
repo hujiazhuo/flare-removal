@@ -6,33 +6,7 @@
 
 1. **输出机制转换**：从加性残差改为减性残差（`clean = input - flare_pred`）
 2. **损失函数**：光晕预测损失 + 感知损失 + FFT 频域损失
-3. **轻量化设计**：wf=16, n_l_blocks=[1,1,1], n_h_blocks=[1,1,1]
-
-## 文件结构
-
-```
-flare-removal/
-├── Wave-Mamba/
-│   ├── basicsr/
-│   │   ├── archs/
-│   │   │   ├── wavemamba_flare_arch.py   # 新架构（核心改造）
-│   │   │   └── wavemamba_arch.py          # 原版架构
-│   │   ├── models/
-│   │   │   ├── wavemamba_flare_model.py   # 训练模型类
-│   │   │   ├── base_model.py
-│   │   │   └── cal_ssim.py
-│   │   ├── losses/
-│   │   │   └── losses.py                  # 新增 L_Abs_pure, L_percepture
-│   │   ├── data/
-│   │   │   ├── flare7kpp_dataset.py       # Flare7K++ 数据集加载
-│   │   │   └── flare7k_dataset.py
-│   │   ├── utils/
-│   │   ├── train.py
-│   │   └── __init__.py
-│   └── options/
-│       └── train_wavemamba_flare.yml       # 训练配置
-└── datasets/                               # 需要软链接或下载
-```
+3. **原始模型规模**：wf=32, n_l_blocks=[1,2,4], n_h_blocks=[1,1,2] (1.51M 参数)
 
 ## 环境安装
 
@@ -57,22 +31,37 @@ pip install opencv-python
 
 ## 数据集准备
 
+下载 Flare7K++ 数据集（https://github.com/yby1305693/Flare7K），创建软链接：
+
 ```bash
-# 软链接 Flare7K++ 数据集
-ln -s /path/to/Flare7K++ flare-removal/datasets/Flare7K++
-ln -s /path/to/Flickr24K flare-removal/datasets/Flickr24K
+# 假设数据集放在 /data/flare 目录
+mkdir -p datasets
+ln -s /data/flare/Flare7K++ datasets/Flare7Kpp
+ln -s /data/flare/Flickr24K datasets/Flickr24K
 ```
+
+然后修改 `options/train_wavemamba_flare.yml` 中的路径。
 
 ## 训练
 
 ```bash
-cd flare-removal/Wave-Mamba
+cd Wave-Mamba
 conda activate flare_removal
 
 python -m basicsr.train -opt options/train_wavemamba_flare.yml
 ```
 
-## 训练结果
+## 模型配置
+
+| 参数 | 值 | 说明 |
+|------|------|------|
+| wf | 32 | 特征通道宽度（原版） |
+| n_l_blocks | [1, 2, 4] | 低频块数量（原版） |
+| n_h_blocks | [1, 1, 2] | 高频块数量（原版） |
+| 参数量 | 1.51M | - |
+| batch_size | 2 | 可根据显存调整 |
+
+## 训练结果 (轻量化版本 wf=16)
 
 | 指标 | 值 |
 |------|------|
