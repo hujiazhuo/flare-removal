@@ -1,0 +1,26 @@
+name: WaveMambaFlare-Test-real100-with-mask
+
+datasets:
+  test_real:
+    name: Flare7Kpp_test_real_100_with_mask
+    type: PairedImageDatasetRealTest
+    dataroot_lq: /home/hjz/cv/Wave-Mamba Flare Removal/datasets/Flare7K++/Flare7Kpp/test_data/real/input
+    dataroot_gt: /home/hjz/cv/Wave-Mamba Flare Removal/datasets/Flare7K++/Flare7Kpp/test_data/real/gt
+    dataroot_mask: /home/hjz/cv/Wave-Mamba Flare Removal/datasets/Flare7K++/Flare7Kpp/test_data/real/mask
+    io_backend:
+      type: disk
+
+network_g:
+  type: WaveMambaFlare
+  in_chn: 3
+  wf: 16
+  n_l_blocks: [1, 1, 1]
+  n_h_blocks: [1, 1, 1]
+  ffn_scale: 2.0
+
+path:
+  pretrain_network_g: /home/hjz/cv/Wave-Mamba Flare Removal/Wave-Mamba/experiments/WaveMambaFlare/models/net_g_best_590000.pth
+
+num_gpu: 1
+dist: false
+manual_seed: 10

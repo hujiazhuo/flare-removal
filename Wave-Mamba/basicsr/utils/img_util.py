@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------
+# Copyright (c) 2022 megvii-model. All Rights Reserved.
+# ------------------------------------------------------------------------
+# Modified from BasicSR (https://github.com/xinntao/BasicSR)
+# Copyright 2018-2020 BasicSR Authors
+# ------------------------------------------------------------------------
 import cv2
 import math
 import numpy as np
@@ -80,7 +86,7 @@ def tensor2img(tensor, rgb2bgr=True, out_type=np.uint8, min_max=(0, 1)):
             img_np = img_np.transpose(1, 2, 0)
             if img_np.shape[2] == 1:  # gray image
                 img_np = np.squeeze(img_np, axis=2)
-            else:
+            elif img_np.shape[2] == 3:
                 if rgb2bgr:
                     img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
         elif n_dim == 2:
@@ -124,63 +130,19 @@ def imfrombytes(content, flag='color', float32=False):
         img = img.astype(np.float32) / 255.
     return img
 
-
-def imfrombytesDP(content, flag='color', float32=False):
-    """Read an image from bytes.
-
-    Args:
-        content (bytes): Image bytes got from files or other streams.
-        flag (str): Flags specifying the color type of a loaded image,
-            candidates are `color`, `grayscale` and `unchanged`.
-        float32 (bool): Whether to change to float32., If True, will also norm
-            to [0, 1]. Default: False.
-
-    Returns:
-        ndarray: Loaded image array.
-    """
-    img_np = np.frombuffer(content, np.uint8)
-    if img_np is None:
-        raise Exception('None .. !!!')
-    img = cv2.imdecode(img_np, cv2.IMREAD_UNCHANGED)
-    if float32:
-        img = img.astype(np.float32) / 65535.
-    return img
-
-
 def padding(img_lq, img_gt, gt_size):
     h, w, _ = img_lq.shape
 
     h_pad = max(0, gt_size - h)
     w_pad = max(0, gt_size - w)
-
+    
     if h_pad == 0 and w_pad == 0:
         return img_lq, img_gt
 
     img_lq = cv2.copyMakeBorder(img_lq, 0, h_pad, 0, w_pad, cv2.BORDER_REFLECT)
     img_gt = cv2.copyMakeBorder(img_gt, 0, h_pad, 0, w_pad, cv2.BORDER_REFLECT)
     # print('img_lq', img_lq.shape, img_gt.shape)
-    if img_lq.ndim == 2:
-        img_lq = np.expand_dims(img_lq, axis=2)
-    if img_gt.ndim == 2:
-        img_gt = np.expand_dims(img_gt, axis=2)
     return img_lq, img_gt
-
-
-def padding_DP(img_lqL, img_lqR, img_gt, gt_size):
-    h, w, _ = img_gt.shape
-
-    h_pad = max(0, gt_size - h)
-    w_pad = max(0, gt_size - w)
-
-    if h_pad == 0 and w_pad == 0:
-        return img_lqL, img_lqR, img_gt
-
-    img_lqL = cv2.copyMakeBorder(img_lqL, 0, h_pad, 0, w_pad, cv2.BORDER_REFLECT)
-    img_lqR = cv2.copyMakeBorder(img_lqR, 0, h_pad, 0, w_pad, cv2.BORDER_REFLECT)
-    img_gt = cv2.copyMakeBorder(img_gt, 0, h_pad, 0, w_pad, cv2.BORDER_REFLECT)
-    # print('img_lq', img_lq.shape, img_gt.shape)
-    return img_lqL, img_lqR, img_gt
-
 
 def imwrite(img, file_path, params=None, auto_mkdir=True):
     """Write image to file.
@@ -221,4 +183,4 @@ def crop_border(imgs, crop_border):
             ]
         else:
             return imgs[crop_border:-crop_border, crop_border:-crop_border,
-                   ...]
+                        ...]

@@ -1,5 +1,5 @@
 from .file_client import FileClient
-from .img_util import crop_border, imfrombytes, img2tensor, imwrite, tensor2img, padding, padding_DP, imfrombytesDP
+from .img_util import crop_border, imfrombytes, img2tensor, imwrite, tensor2img, padding
 from .logger import (MessageLogger, get_env_info, get_root_logger,
                      init_tb_logger, init_wandb_logger, AvgTimer)
 # rom .logger import AvgTimer, MessageLogger, get_env_info, get_root_logger, init_tb_logger, init_wandb_logger
@@ -32,8 +32,6 @@ __all__ = [
     'check_resume',
     'sizeof_fmt',
     'padding',
-    'padding_DP',
-    'imfrombytesDP',
     'create_lmdb_for_reds',
     'create_lmdb_for_gopro',
     'create_lmdb_for_rain13k',
